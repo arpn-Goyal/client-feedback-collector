@@ -6,9 +6,9 @@ import useSecureFeedbackSubmit from "../../hooks/useSecureFeedbackSubmit.js";
 
 export default function ClientFeedbackForm() {
   const [files, setFiles] = useState([]);
-const [previewUrls, setPreviewUrls] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
   const [title, setTitle] = useState("Main Demo"); // Default title
-  const [description, setDescription] = useState( 
+  const [description, setDescription] = useState(
     "This is a sample description for demo purposes."
   ); // Default description
   const [projectVersion, setProjectVersion] = useState("v1.0"); // Default version
@@ -27,7 +27,7 @@ const [previewUrls, setPreviewUrls] = useState([]);
     versionFeedback: "v1.0 is stable but missing some features 🔧",
   });
   const [showEmojiPicker, setShowEmojiPicker] = useState({});
-  
+
   const [honeypot, setHoneypot] = useState("");
   const [token, setToken] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -48,8 +48,10 @@ const [previewUrls, setPreviewUrls] = useState([]);
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
     setFiles(selectedFiles);
+    console.log(`SelectedFiles:  ${selectedFiles}`)
     const previews = selectedFiles.map((file) => URL.createObjectURL(file));
     setPreviewUrls(previews);
+    console.log(`Previews:  ${previews}`)
   };
 
   const handleReactionClick = (type) => {
@@ -75,11 +77,11 @@ const [previewUrls, setPreviewUrls] = useState([]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (honeypot) return; // 🕳️ Honeypot triggered
-  
-    const hash = btoa(token);
-  
+
+    const hash = btoa(token); 
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
@@ -89,21 +91,20 @@ const [previewUrls, setPreviewUrls] = useState([]);
     formData.append("token", token);
     formData.append("userAgent", navigator.userAgent);
     formData.append("ip", ""); // backend should determine real IP
-  
+
     files.forEach((file) => {
       formData.append("files", file);
     });
-  
+
     // ✅ Correctly append entire feedback object as a string
     formData.append("feedback", JSON.stringify(feedback));
-  
+
     const res = await submitFeedback(formData);
     if (res && res.success) {
       localStorage.setItem(`submitted_${hash}`, "true");
       setIsSubmitted(true);
     }
   };
-  
 
   if (isSubmitted) {
     return (

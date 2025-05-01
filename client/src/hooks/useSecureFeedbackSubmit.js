@@ -24,7 +24,7 @@ export default function useSecureFeedbackSubmit() {
       });
 
       if (res.data.success) {
-        setSuccess(true);
+           
         return { success: true };
       } else {
         throw new Error('Submission failed');

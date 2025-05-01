@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 
 import {connectDB} from './config/db.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
+import dashboardRoutes from './routes/dashboard.js';
 import { notFound, errorHandler } from './middleware/error.js';
 
 dotenv.config();
@@ -26,6 +27,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Test Route
 app.get('/api/ping', (req, res) => {
