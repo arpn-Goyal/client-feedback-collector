@@ -6,26 +6,18 @@ export default function useSecureFeedbackSubmit() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const submitFeedback = async (formPayload) => {
+  const submitFeedback = async (formData) => {
     setLoading(true);
     setError('');
     setSuccess(false);
 
     try {
-      const formData = new FormData();
-      for (const [key, value] of Object.entries(formPayload)) {
-        if (key === 'files') {
-          value.forEach((file) => formData.append('files', file));
-        } else if (typeof value === 'object' && value !== null) {
-          for (const [subKey, subValue] of Object.entries(value)) {
-            formData.append(subKey, subValue);
-          }
-        } else {
-          formData.append(key, value);
-        }
+      console.log('i m in hook - FormData contents:');
+      for (let pair of formData.entries()) {
+        console.log(`${pair[0]}:`, pair[1]);
       }
-
-      const res = await axios.post('/api/feedback', formData, {
+      
+      const res = await axios.post('http://localhost:4000/api/feedback', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

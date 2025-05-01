@@ -5,21 +5,29 @@ import EmojiPicker from "emoji-picker-react";
 import useSecureFeedbackSubmit from "../../hooks/useSecureFeedbackSubmit.js";
 
 export default function ClientFeedbackForm() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
   const [files, setFiles] = useState([]);
-  const [previewUrls, setPreviewUrls] = useState([]);
-  const [reaction, setReaction] = useState("");
+const [previewUrls, setPreviewUrls] = useState([]);
+  const [title, setTitle] = useState("Main Demo"); // Default title
+  const [description, setDescription] = useState( 
+    "This is a sample description for demo purposes."
+  ); // Default description
+  const [projectVersion, setProjectVersion] = useState("v1.0"); // Default version
+  const [expiryDate, setExpiryDate] = useState(() => {
+    const today = new Date();
+    today.setDate(today.getDate() + 7); // Default deadline based on v1.0
+    return today.toISOString().split("T")[0];
+  });
+  const [reaction, setReaction] = useState("happy"); // Default sentiment
+
   const [feedback, setFeedback] = useState({
-    featureRequests: "",
-    bugsIssues: "",
-    positiveFeedback: "",
-    complaints: "",
-    versionFeedback: "",
+    featureRequests: "Add dark mode 🌙",
+    bugsIssues: "Login button not working on mobile 🚫",
+    positiveFeedback: "Great UI and smooth experience! 👏",
+    complaints: "Too many popups 😡",
+    versionFeedback: "v1.0 is stable but missing some features 🔧",
   });
   const [showEmojiPicker, setShowEmojiPicker] = useState({});
-  const [projectVersion, setProjectVersion] = useState("");
+  
   const [honeypot, setHoneypot] = useState("");
   const [token, setToken] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -67,29 +75,35 @@ export default function ClientFeedbackForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (honeypot) return; // 🕳️ Honeypot triggered
-
+  
     const hash = btoa(token);
-    const formPayload = {
-      title,
-      description,
-      projectVersion,
-      expiryDate,
-      files,
-      reaction,
-      feedback,
-      token,
-      userAgent: navigator.userAgent,
-      ip: null, // set on backend
-    };
-
-    const res = await submitFeedback(formPayload);
+  
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("projectVersion", projectVersion);
+    formData.append("expiryDate", expiryDate);
+    formData.append("reaction", reaction);
+    formData.append("token", token);
+    formData.append("userAgent", navigator.userAgent);
+    formData.append("ip", ""); // backend should determine real IP
+  
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+  
+    // ✅ Correctly append entire feedback object as a string
+    formData.append("feedback", JSON.stringify(feedback));
+  
+    const res = await submitFeedback(formData);
     if (res && res.success) {
       localStorage.setItem(`submitted_${hash}`, "true");
       setIsSubmitted(true);
     }
   };
+  
 
   if (isSubmitted) {
     return (

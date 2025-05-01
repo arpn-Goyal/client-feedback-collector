@@ -1,15 +1,15 @@
-import { useState } from 'react'
-import './App.css'
-import ClientFeedbackForm from './pages/feedback/ClientFeedbackForm'
+import { Routes, Route } from 'react-router-dom';
+import ClientFeedbackForm from './pages/feedback/ClientFeedbackForm';
+import NotFound from './pages/NotFound'; // Optional 404
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-    <ClientFeedbackForm></ClientFeedbackForm>
-    </>
-  )
+    <Routes>
+      <Route path="/feedback" element={<ClientFeedbackForm />} />
+      {/* Optional fallback */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
 }
 
-export default App
+export default App;
