@@ -351,7 +351,7 @@ export const getDashboardTopics = async (req, res) => {
       .map(([word, count]) => ({ word, count }));
 
     res.json({
-      businessTopics: topBusiness,
+      businessTopics: topBusiness,  
       trendingTopics: topTrending
     });
   } catch (err) {
