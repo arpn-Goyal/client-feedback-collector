@@ -209,87 +209,153 @@ export const getDashboardBreakdown = async (req, res) => {
 
 
 // Topics
-export const getDashboardTopics = async (req, res) => {
-    try {
-      // Fetch all text fields
-      const feedbacks = await FeedbackMongodb.find({}, {
-        'feedback.bugsIssues': 1,
-        'feedback.featureRequests': 1,
-        'feedback.complaints': 1,
-        'feedback.positiveFeedback': 1,
-        'feedback.versionFeedback': 1
-      });
+// export const getDashboardTopics = async (req, res) => {
+//     try {
+//       // Fetch all text fields
+//       const feedbacks = await FeedbackMongodb.find({}, {
+//         'feedback.bugsIssues': 1,
+//         'feedback.featureRequests': 1,
+//         'feedback.complaints': 1,
+//         'feedback.positiveFeedback': 1,
+//         'feedback.versionFeedback': 1
+//       });
   
-      const wordCount = {};
+//       const wordCount = {};
   
-      feedbacks.forEach(entry => {
-        const fields = Object.values(entry.feedback || {});
-        fields.forEach(text => {
-          if (!text) return;
-          const words = text
-            .toLowerCase()
-            .replace(/[^\w\s]/gi, '')  // Remove punctuation
-            .split(/\s+/);             // Split by space
+//       feedbacks.forEach(entry => {
+//         const fields = Object.values(entry.feedback || {});
+//         fields.forEach(text => {
+//           if (!text) return;
+//           const words = text
+//             .toLowerCase()
+//             .replace(/[^\w\s]/gi, '')  // Remove punctuation
+//             .split(/\s+/);             // Split by space
   
-          words.forEach(word => {
-            if (word.length < 3) return; // Skip short/common words
-            wordCount[word] = (wordCount[word] || 0) + 1;
-          });
-        });
-      });
+//           words.forEach(word => {
+//             if (word.length < 3) return; // Skip short/common words
+//             wordCount[word] = (wordCount[word] || 0) + 1;
+//           });
+//         });
+//       });
   
-      // Convert to sorted array
-      const topWords = Object.entries(wordCount)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10)
-        .map(([word, count]) => ({ word, count }));
+//       // Convert to sorted array
+//       const topWords = Object.entries(wordCount)
+//         .sort((a, b) => b[1] - a[1])
+//         .slice(0, 10)
+//         .map(([word, count]) => ({ word, count }));
   
-      res.json({ topics: topWords });
-    } catch (err) {
-      console.error("Error in topics API:", err);
-      res.status(500).json({ message: "Failed to load topics" });
-    }
-  };
+//       res.json({ topics: topWords });
+//     } catch (err) {
+//       console.error("Error in topics API:", err);
+//       res.status(500).json({ message: "Failed to load topics" });
+//     }
+//   };
   
 
 // Title-Desc-Topics
-export const getTitleDescriptionTopics = async (req, res) => {
-    try {
-      const allowedKeywords = new Set([
-        "design", "product", "functionality", "bug", "issue", "business", "good",
-        "performance", "feedback", "experience", "feature", "login", "dark", "crash",
-        "responsive", "mobile", "slow", "fast", "ui", "ux", "navigation", "error",
-        "stable", "popup", "layout", "dashboard", "form", "data"
-      ]);
+// export const getTitleDescriptionTopics = async (req, res) => {
+//     try {
+//       const allowedKeywords = new Set([
+//         "design", "product", "functionality", "bug", "issue", "business", "good",
+//         "performance", "feedback", "experience", "feature", "login", "dark", "crash",
+//         "responsive", "mobile", "slow", "fast", "ui", "ux", "navigation", "error",
+//         "stable", "popup", "layout", "dashboard", "form", "data"
+//       ]);
   
-      const feedbacks = await FeedbackMongodb.find({}, {
-        title: 1,
-        description: 1
+//       const feedbacks = await FeedbackMongodb.find({}, {
+//         title: 1,
+//         description: 1
+//       });
+  
+//       const keywordCount = {};
+  
+//       feedbacks.forEach(entry => {
+//         const text = `${entry.title} ${entry.description}`.toLowerCase();
+//         const words = text
+//           .replace(/[^\w\s]/gi, '') // remove punctuation
+//           .split(/\s+/);
+  
+//         words.forEach(word => {
+//           if (allowedKeywords.has(word)) {
+//             keywordCount[word] = (keywordCount[word] || 0) + 1;
+//           }
+//         });
+//       });
+  
+//       const result = Object.entries(keywordCount)
+//         .sort((a, b) => b[1] - a[1])
+//         .map(([word, count]) => ({ word, count }));
+  
+//       res.json({ titleDescTopics: result });
+//     } catch (err) {
+//       console.error("Error in title/desc topic API:", err);
+//       res.status(500).json({ message: "Failed to load title/desc topics" });
+//     }
+//   };
+  
+
+
+export const getDashboardTopics = async (req, res) => {
+  try {
+    // 1. Business-relevant keywords (controlled vocab)
+    const allowedKeywords = new Set([
+      "design", "product", "functionality", "bug", "issue", "business", "good",
+      "performance", "feedback", "experience", "feature", "login", "dark", "crash",
+      "responsive", "mobile", "slow", "fast", "ui", "ux", "navigation", "error",
+      "stable", "popup", "layout", "dashboard", "form", "data"
+    ]);
+
+    const stopWords = new Set([
+      "a", "an", "and", "are", "as", "at", "be", "but", "by", "for", "if", "in", "into",
+      "is", "it", "no", "not", "of", "on", "or", "such", "that", "the", "their",
+      "then", "there", "these", "they", "this", "to", "was", "will", "with"
+    ]);
+
+    const feedbacks = await FeedbackMongodb.find({}, {
+      title: 1,
+      description: 1,
+      feedback: 1
+    });
+
+    const businessKeywordCount = {};
+    const trendingKeywordCount = {};
+
+    feedbacks.forEach(entry => {
+      // -- Title + Description (Controlled keywords only)
+      const combinedText = `${entry.title} ${entry.description}`.toLowerCase();
+      const businessWords = combinedText.replace(/[^\w\s]/gi, '').split(/\s+/);
+      businessWords.forEach(word => {
+        if (allowedKeywords.has(word)) {
+          businessKeywordCount[word] = (businessKeywordCount[word] || 0) + 1;
+        }
       });
-  
-      const keywordCount = {};
-  
-      feedbacks.forEach(entry => {
-        const text = `${entry.title} ${entry.description}`.toLowerCase();
-        const words = text
-          .replace(/[^\w\s]/gi, '') // remove punctuation
-          .split(/\s+/);
-  
-        words.forEach(word => {
-          if (allowedKeywords.has(word)) {
-            keywordCount[word] = (keywordCount[word] || 0) + 1;
-          }
-        });
+
+      // -- Feedback Fields (All dynamic keywords except stopwords)
+      const feedbackText = Object.values(entry.feedback || {}).join(" ").toLowerCase();
+      const feedbackWords = feedbackText.replace(/[^\w\s]/gi, '').split(/\s+/);
+      feedbackWords.forEach(word => {
+        if (word.length >= 3 && !stopWords.has(word)) {
+          trendingKeywordCount[word] = (trendingKeywordCount[word] || 0) + 1;
+        }
       });
-  
-      const result = Object.entries(keywordCount)
-        .sort((a, b) => b[1] - a[1])
-        .map(([word, count]) => ({ word, count }));
-  
-      res.json({ titleDescTopics: result });
-    } catch (err) {
-      console.error("Error in title/desc topic API:", err);
-      res.status(500).json({ message: "Failed to load title/desc topics" });
-    }
-  };
-  
+    });
+
+    const topBusiness = Object.entries(businessKeywordCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([word, count]) => ({ word, count }));
+
+    const topTrending = Object.entries(trendingKeywordCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([word, count]) => ({ word, count }));
+
+    res.json({
+      businessTopics: topBusiness,
+      trendingTopics: topTrending
+    });
+  } catch (err) {
+    console.error("Error in merged topics API:", err);
+    res.status(500).json({ message: "Failed to load merged topics" });
+  }
+};
