@@ -28,7 +28,7 @@ const AdminDashboard = () => {
 
         setSummary(summaryRes.data);
         setTrends(trendsRes.data);
-        setBreakdown(breakdownRes.data.breakdown);
+        setBreakdown(breakdownRes.data);
         setTopics(topicsRes.data.trendingTopics);
         setTitleDescTopics(topicsRes.data.businessTopics);
         setLoading(false);
