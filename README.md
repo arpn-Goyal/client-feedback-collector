@@ -109,7 +109,6 @@ client-feedback-collector/
 - [ ] Client dashboards to manage multiple links
 - [ ] Admin notifications on new feedback
 - [ ] AI sentiment analysis of feedback
-- [ ] Webhook support (Slack, Trello, Notion integration)
 - [ ] Audit logs and activity timeline
 
 ---
