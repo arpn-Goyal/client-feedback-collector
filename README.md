@@ -21,8 +21,7 @@ Designed with production-grade backend architecture and real-world scalability i
 | Database     | MongoDB + Mongoose                   |
 | File Storage | AWS S3 / Cloudinary / Local fallback |
 | Auth System  | JWT, Token-based link sharing        |
-| Hosting      | Vercel (frontend), Render/Railway    |
-| Optional     | WebSocket for real-time feedback     |
+| Hosting      | AWS, Render
 
 ---
 
