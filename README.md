@@ -10,6 +10,7 @@
 
 Designed with production-grade backend architecture and real-world scalability in mind.
 URL : http://localhost:5173/feedback?token=USERTOKEN
+Feedback Collector Admin Dashboard : http://localhost:5173/admin-dashboard
 ---
 
 ## ⚙️ Tech Stack
