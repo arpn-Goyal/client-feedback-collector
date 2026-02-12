@@ -9,7 +9,7 @@
 **Client Feedback Collector** enables freelancers, designers, and product teams to share feedback forms via secure links without requiring client login. It supports text input, file uploads, emoji sentiment reactions, and tracks changes across multiple versions of feedback.
 
 Designed with production-grade backend architecture and real-world scalability in mind.
-
+URL : http://localhost:5173/feedback?token=USERTOKEN
 ---
 
 ## ⚙️ Tech Stack
